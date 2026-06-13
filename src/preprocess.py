@@ -5,9 +5,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
-import joblib
 
-# ── Feature lists (based on EDA) ──────────────────────────────────────────────
 numeric_features = ['tenure', 'MonthlyCharges', 'TotalCharges']
 
 categorical_features = [
@@ -17,7 +15,6 @@ categorical_features = [
     'Contract', 'PaperlessBilling', 'PaymentMethod'
 ]
 
-# ── Load + clean ───────────────────────────────────────────────────────────────
 def load_and_clean(filepath):
     df = pd.read_csv(filepath)
     df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
@@ -25,7 +22,6 @@ def load_and_clean(filepath):
     df['Churn'] = (df['Churn'] == 'Yes').astype(int)
     return df
 
-# ── Preprocessor ───────────────────────────────────────────────────────────────
 def build_preprocessor():
     numeric_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='median')),
@@ -44,22 +40,19 @@ def build_preprocessor():
 
     return preprocessor
 
-# ── Split + verify ─────────────────────────────────────────────────────────────
-def load_and_split(filepath):
-    df = load_and_clean(filepath)
+def load_and_split(df):
     X = df.drop(columns=['Churn'])
     y = df['Churn']
-
+    
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
-
+    
     return X_train, X_test, y_train, y_test
 
-
-# ── Quick smoke test ───────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    X_train, X_test, y_train, y_test = load_and_split('../data/telco_churn.csv')
+    df = load_and_clean('../data/telco_churn.csv')
+    X_train, X_test, y_train, y_test = load_and_split(df)
     preprocessor = build_preprocessor()
 
     X_train_transformed = preprocessor.fit_transform(X_train)
